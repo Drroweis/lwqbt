@@ -21,7 +21,7 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://lwqbt.onrender.com:5173', // Vite's default port
+  origin: 'https://lwqbt.onrender.com', // Vite's default port
   credentials: true
 }));
 
