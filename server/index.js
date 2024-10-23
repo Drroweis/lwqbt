@@ -12,7 +12,7 @@ import { rateLimit } from 'express-rate-limit';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Connect to MongoDB
 connectDB();
@@ -21,7 +21,7 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite's default port
+  origin: 'http://lwqbt.onrender.com:5173', // Vite's default port
   credentials: true
 }));
 
