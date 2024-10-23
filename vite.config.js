@@ -1,13 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': isProduction ? 'https://lwqbt.onrender.com/api' : 'http://localhost:10000'
+      '/api': 'http://localhost:10000' // Update this for local development only
     }
   },
   build: {
