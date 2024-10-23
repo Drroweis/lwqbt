@@ -7,8 +7,8 @@
     "dev": "concurrently \"nodemon server/index.js\" \"vite\"",
     "start": "node server/index.js",
     "build": "vite build",
-    "lint": "eslint .",  // Add if you use ESLint
-    "test": "jest"       // Add if you plan to use Jest for testing
+    "lint": "eslint .",
+    "test": "jest"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -41,6 +41,6 @@
     "vite": "^5.0.7"
   },
   "engines": {
-    "node": ">=14.x"  // Specify your Node.js version (if applicable)
+    "node": ">=14.x"
   }
 }
