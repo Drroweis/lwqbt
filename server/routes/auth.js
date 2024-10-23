@@ -1,109 +1,19 @@
-import express from 'express';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import { auth } from '../middleware/auth.js';
 
-const router = express.Router();
+export const auth = (req, res, next) => {
+  // Get token from cookies
+  const token = req.cookies.token;
 
-// Register
-router.post('/register', async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-
-    // Check if user exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Create user
-    const user = new User({
-      username,
-      email,
-      password: hashedPassword
-    });
-
-    await user.save();
-
-    // Create token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d'
-    });
-
-    // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
-    // Return user data (excluding password)
-    const userWithoutPassword = { ...user.toObject() };
-    delete userWithoutPassword.password;
-
-    res.status(201).json({ user: userWithoutPassword });
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating user' });
+  if (!token) {
+    return res.status(401).json({ message: 'Authentication required' });
   }
-});
 
-// Login
-router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    // Create token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d'
-    });
-
-    // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
-    // Return user data (excluding password)
-    const userWithoutPassword = { ...user.toObject() };
-    delete userWithoutPassword.password;
-
-    res.json({ user: userWithoutPassword });
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Add user info to request
+    next(); // Proceed to the next middleware/route
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in' });
+    return res.status(403).json({ message: 'Invalid token' });
   }
-});
-
-// Logout
-router.post('/logout', (req, res) => {
-  res.clearCookie('token');
-  res.json({ message: 'Logged out successfully' });
-});
-
-// Get current user
-router.get('/me', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select('-password');
-    res.json({ user });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching user data' });
-  }
-});
-
-export default router;
+};
