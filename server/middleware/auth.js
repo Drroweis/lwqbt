@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
+// Middleware for user authentication
 export const auth = async (req, res, next) => {
   try {
     const token = req.cookies.token;
@@ -14,20 +15,21 @@ export const auth = async (req, res, next) => {
       return res.status(401).json({ message: 'User not found' });
     }
 
-    req.user = user;
-    next();
+    req.user = user; // Attach user to request object
+    next(); // Proceed to the next middleware/route
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
   }
 };
 
+// Middleware for admin authentication
 export const adminAuth = async (req, res, next) => {
   try {
     await auth(req, res, () => {
       if (!req.user.isAdmin) {
         return res.status(403).json({ message: 'Admin access required' });
       }
-      next();
+      next(); // Proceed to the next middleware/route
     });
   } catch (error) {
     res.status(403).json({ message: 'Admin access required' });
